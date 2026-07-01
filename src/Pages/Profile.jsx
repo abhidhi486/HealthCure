@@ -33,7 +33,6 @@ function Profile() {
     const fetchData = async () => {
       try {
 
-        // 🔥 UID BASED (BEST PRACTICE)
         const docRef = doc(db, "users", user.uid)
         const docSnap = await getDoc(docRef)
 
@@ -57,7 +56,6 @@ function Profile() {
           await setDoc(docRef, defaultData)
         }
 
-        // 🔥 APPOINTMENTS FETCH (FIXED PATH)
         const apptRef = collection(db, "appointments")
         const apptSnap = await getDocs(apptRef)
 
@@ -81,17 +79,14 @@ function Profile() {
   const handleSave = async () => {
     try {
 
-      // 🔥 AUTH UPDATE
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
           displayName: data.name
         })
       }
 
-      // 🔥 FIRESTORE SAVE
       await setDoc(doc(db, "users", user.uid), data)
 
-      // 🔥 CONTEXT UPDATE (IMPORTANT)
       updateUser({ name: data.name })
 
       setEdit(false)
