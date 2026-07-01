@@ -51,6 +51,15 @@ function Profile() {
     alert("Profile Saved ✅")
   }
 
+  const handleDeleteAppointment = (id) => {
+    if (!user) return
+
+    const updated = appointments.filter((a) => a.id !== id)
+
+    setAppointments(updated)
+    localStorage.setItem("appointments_" + user.email, JSON.stringify(updated))
+  }
+
   const handleImage = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -130,6 +139,17 @@ function Profile() {
       padding: "15px",
       borderRadius: "10px",
       background: "#f2f0e2"
+    },
+
+    deleteBtn: {
+      background: "#b03a2e",
+      color: "#fff",
+      border: "none",
+      borderRadius: "15px",
+      padding: "6px 14px",
+      fontSize: "12px",
+      cursor: "pointer",
+      marginTop: "5px"
     }
   }
 
@@ -231,12 +251,18 @@ function Profile() {
           {appointments.length === 0 ? (
             <p>No appointments yet ❌</p>
           ) : (
-            appointments.map((a, i) => (
-              <div key={i}>
+            appointments.map((a) => (
+              <div key={a.id}>
                 <p><b>Doctor:</b> {a.doctor}</p>
                 <p><b>Date:</b> {a.date}</p>
                 <p><b>Time:</b> {a.time}</p>
                 <p><b>Status:</b> Pending ⏳</p>
+                <button
+                  style={styles.deleteBtn}
+                  onClick={() => handleDeleteAppointment(a.id)}
+                >
+                  Cancel Appointment
+                </button>
                 <hr />
               </div>
             ))

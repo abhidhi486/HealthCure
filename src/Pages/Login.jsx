@@ -15,8 +15,25 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    const existingUsers = JSON.parse(localStorage.getItem("users")) || []
+
+    const matchedUser = existingUsers.find(
+      (u) => u.email.toLowerCase() === form.email.toLowerCase()
+    )
+
+    if (!matchedUser) {
+      alert("No account found with this email ❌")
+      return
+    }
+
+    if (matchedUser.password !== form.password) {
+      alert("Incorrect password ❌")
+      return
+    }
+
     const userData = {
-      email: form.email
+      name: matchedUser.name,
+      email: matchedUser.email
     }
 
     login(userData)

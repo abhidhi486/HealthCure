@@ -22,20 +22,25 @@ function Signup() {
       return
     }
 
+    if (form.password.length < 6) {
+      alert("Password must be at least 6 characters ❌")
+      return
+    }
+
     const existingUsers = JSON.parse(localStorage.getItem("users")) || []
 
     const userExists = existingUsers.find(
-      (user) => user.email === form.email
+      (user) => user.email.toLowerCase() === form.email.toLowerCase()
     )
 
     if (userExists) {
-      alert("User already exists ❌")
+      alert("An account with this email already exists. Please login instead ❌")
       return
     }
 
     const newUser = {
-      name: form.fullName,
-      email: form.email,
+      name: form.fullName.trim(),
+      email: form.email.toLowerCase().trim(),
       password: form.password
     }
 
