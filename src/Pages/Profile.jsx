@@ -1,16 +1,19 @@
 import { useContext, useState, useEffect } from "react"
 import { AuthContext } from "../AuthContext"
 
+import { db, auth } from "../firebase"
+import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore"
+import { updateProfile } from "firebase/auth"
+
 function Profile() {
 
-  const { user } = useContext(AuthContext)
+  const { user, loading, updateUser } = useContext(AuthContext)
 
   const [edit, setEdit] = useState(false)
   const [appointments, setAppointments] = useState([])
 
   const [data, setData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
+    name: "",
     phone: "",
     username: "",
     photo: "",
@@ -22,40 +25,88 @@ function Profile() {
     history: "",
   })
 
+  if (loading) return <h2 style={{marginTop:"100px", textAlign:"center"}}>Loading...</h2>
+  if (!user) return <h2 style={{marginTop:"100px", textAlign:"center"}}>Please Login</h2>
+
   useEffect(() => {
-    if (!user) return
 
-    const saved = localStorage.getItem("profile_" + user.email)
+    const fetchData = async () => {
+      try {
 
-    if (saved) {
-      const parsed = JSON.parse(saved)
+        // 🔥 UID BASED (BEST PRACTICE)
+        const docRef = doc(db, "users", user.uid)
+        const docSnap = await getDoc(docRef)
 
-      setData(prev => ({
-        ...prev,
-        ...parsed,
-        name: parsed.name || user?.name || "",
-        email: parsed.email || user?.email || ""
-      }))
+        if (docSnap.exists()) {
+          setData(docSnap.data())
+        } else {
+          const defaultData = {
+            name: user.name || "",
+            phone: "",
+            username: "",
+            photo: "",
+            age: "",
+            gender: "",
+            blood: "",
+            address: "",
+            emergency: "",
+            history: "",
+          }
+
+          setData(defaultData)
+          await setDoc(docRef, defaultData)
+        }
+
+        // 🔥 APPOINTMENTS FETCH (FIXED PATH)
+        const apptRef = collection(db, "appointments")
+        const apptSnap = await getDocs(apptRef)
+
+        const userAppointments = apptSnap.docs
+          .map(doc => doc.data())
+          .filter(a => a.userEmail === user.email)
+
+        setAppointments(userAppointments)
+
+      } catch (err) {
+        console.log(err)
+      }
     }
 
-    const appt = JSON.parse(localStorage.getItem("appointments_" + user.email)) || []
-    setAppointments(appt)
+    if (user?.uid) {
+      fetchData()
+    }
 
   }, [user])
 
-  const handleSave = () => {
-    if (!user) return
+  const handleSave = async () => {
+    try {
 
-    localStorage.setItem("profile_" + user.email, JSON.stringify(data))
-    setEdit(false)
-    alert("Profile Saved ✅")
+      // 🔥 AUTH UPDATE
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: data.name
+        })
+      }
+
+      // 🔥 FIRESTORE SAVE
+      await setDoc(doc(db, "users", user.uid), data)
+
+      // 🔥 CONTEXT UPDATE (IMPORTANT)
+      updateUser({ name: data.name })
+
+      setEdit(false)
+      alert("Profile Saved ✅")
+
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   const handleImage = (e) => {
     const file = e.target.files[0]
     if (file) {
       const imgURL = URL.createObjectURL(file)
-      setData({ ...data, photo: imgURL })
+      setData(prev => ({ ...prev, photo: imgURL }))
     }
   }
 
@@ -68,7 +119,6 @@ function Profile() {
       minHeight: "100vh",
       padding: "40px"
     },
-
     box: {
       width: "500px",
       background: "#fff",
@@ -76,19 +126,16 @@ function Profile() {
       padding: "30px",
       boxShadow: "0 5px 20px #00000014"
     },
-
     heading: {
       textAlign: "center",
       marginBottom: "20px",
       color: "#827b58"
     },
-
     imgBox: {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
     },
-
     img: {
       width: "100px",
       height: "100px",
@@ -97,7 +144,6 @@ function Profile() {
       marginBottom: "10px",
       border: "2px solid #ddd"
     },
-
     input: {
       width: "100%",
       padding: "10px",
@@ -106,14 +152,12 @@ function Profile() {
       border: "1px solid #ccc",
       outline: "none"
     },
-
     label: {
       fontSize: "14px",
       marginBottom: "5px",
       display: "block",
       color: "#827b58"
     },
-
     button: {
       width: "100%",
       padding: "10px",
@@ -124,7 +168,6 @@ function Profile() {
       cursor: "pointer",
       marginTop: "10px"
     },
-
     appointmentBox: {
       marginTop: "20px",
       padding: "15px",
@@ -156,8 +199,9 @@ function Profile() {
           onChange={(e) => setData({ ...data, name: e.target.value })}
         />
 
+        {/* 🔥 EMAIL ALWAYS FROM AUTH */}
         <label style={styles.label}>Email</label>
-        <input style={styles.input} value={data.email} disabled />
+        <input style={styles.input} value={user.email} disabled />
 
         <label style={styles.label}>Phone</label>
         <input
