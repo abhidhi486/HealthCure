@@ -2,9 +2,6 @@ import { useState, useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../AuthContext"
 
-import { db } from "../firebase"
-import { collection, addDoc } from "firebase/firestore"
-
 function Appointment() {
 
   const { user } = useContext(AuthContext)
@@ -52,15 +49,30 @@ function Appointment() {
 
     if (!user) return
 
-    setAppointmentForm((prev) => ({
-      ...prev,
-      email: user.email,
-      name: user.displayName || ""
-    }))
+    let storedProfile = localStorage.getItem("profile_" + user.email)
+
+    if (storedProfile) {
+      const profile = JSON.parse(storedProfile)
+
+      setAppointmentForm((prev) => ({
+        ...prev,
+        name: profile.name || "",
+        email: profile.email || user.email,
+        phone: profile.phone || "",
+        address: profile.address || "",
+        age: profile.age || "",
+        gender: profile.gender || ""
+      }))
+    } else {
+      setAppointmentForm((prev) => ({
+        ...prev,
+        email: user.email
+      }))
+    }
 
   }, [user])
 
-  const handleSubmit = async (e) => { 
+  const handleSubmit = (e) => {
     e.preventDefault()
 
     if (!appointmentForm.time) {
@@ -78,23 +90,28 @@ function Appointment() {
       return
     }
 
-    try {
-      await addDoc(collection(db, "appointments"), {
-        ...appointmentForm,
-        userEmail: user.email,
-        createdAt: new Date()
-      })
-
-      setShowPopup(true)
-
-      setTimeout(() => {
-        setShowPopup(false)
-        navigate("/")
-      }, 1500)
-
-    } catch (err) {
-      alert(err.message)
+    const appointmentData = {
+      ...appointmentForm,
+      id: new Date().getTime()
     }
+
+    let existing = localStorage.getItem("appointments_" + user.email)
+
+    existing = existing ? JSON.parse(existing) : []
+
+    existing.push(appointmentData)
+
+    localStorage.setItem(
+      "appointments_" + user.email,
+      JSON.stringify(existing)
+    )
+
+    setShowPopup(true)
+
+    setTimeout(() => {
+      setShowPopup(false)
+      navigate("/")
+    }, 1500)
   }
 
   const ui = {
