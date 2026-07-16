@@ -4,15 +4,18 @@ import dr from "../Image/dr.jpg"
 
 function Hero() {
 
+  const isMobile = window.innerWidth < 992
+
   const styles = {
 
     container: {
       marginTop: "90px",
-      height: "calc(100vh - 90px)",
+      height: isMobile ? "auto" : "calc(100vh - 90px)",
       display: "flex",
+      flexDirection: isMobile ? "column" : "row",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "0 80px",
+      padding: isMobile ? "30px 20px" : "0 80px",
       background: "linear-gradient(135deg, #faf9f6 0%, #f0ede3 100%)",
       position: "relative",
       overflow: "hidden"
@@ -20,7 +23,8 @@ function Hero() {
 
     left: {
       maxWidth: "550px",
-      zIndex: 2
+      zIndex: 2,
+      textAlign: isMobile ? "center" : "left"
     },
 
     tag: {
@@ -37,14 +41,14 @@ function Hero() {
     },
 
     darkHead: {
-      fontSize: "55px",
+      fontSize: isMobile ? "32px" : "55px",
       fontWeight: "800",
       color: "#2a2a2a",
       margin: 0
     },
 
     goldHead: {
-      fontSize: "55px",
+      fontSize: isMobile ? "32px" : "55px",
       fontWeight: "800",
       color: "#827b58",
       marginBottom: "20px"
@@ -59,7 +63,9 @@ function Hero() {
 
     link: {
       display: "flex",
-      gap: "15px"
+      flexDirection: isMobile ? "column" : "row",
+      gap: "15px",
+      justifyContent: isMobile ? "center" : "flex-start"
     },
 
     dark: {
@@ -68,7 +74,8 @@ function Hero() {
       color: "#fff",
       borderRadius: "30px",
       textDecoration: "none",
-      fontWeight: "600"
+      fontWeight: "600",
+      textAlign: "center"
     },
 
     gold: {
@@ -77,39 +84,45 @@ function Hero() {
       borderRadius: "30px",
       color: "#827b58",
       textDecoration: "none",
-      fontWeight: "600"
+      fontWeight: "600",
+      textAlign: "center"
     },
 
     stats: {
       display: "flex",
-      gap: "30px",
+      flexDirection: isMobile ? "column" : "row",
+      gap: "20px",
       marginTop: "40px",
       borderTop: "1px solid rgba(130,123,88,0.2)",
-      paddingTop: "20px"
+      paddingTop: "20px",
+      alignItems: isMobile ? "center" : "flex-start"
     },
 
     imageWrapper: {
-      position: "absolute",
-      right: "0",
-      top: "0",
-      height: "100%",
-      width: "50%",
-      overflow: "hidden"
+      position: isMobile ? "relative" : "absolute",
+      right: 0,
+      top: 0,
+      height: isMobile ? "300px" : "100%",
+      width: isMobile ? "100%" : "50%",
+      marginTop: isMobile ? "20px" : "0"
     },
 
     image: {
       width: "100%",
       height: "100%",
-      objectFit: "cover"
+      objectFit: "cover",
+      borderRadius: isMobile ? "10px" : "0"
     },
 
     fade: {
+      display: isMobile ? "none" : "block",
       position: "absolute",
       left: 0,
       top: 0,
       width: "100%",
       height: "100%",
-      background: "radial-gradient(circle at -100% 75%, #f6f5f2 57%, transparent 74%)"    }
+      background: "radial-gradient(circle at -100% 75%, #f6f5f2 57%, transparent 74%)"
+    }
   }
 
   return (

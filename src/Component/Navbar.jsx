@@ -6,6 +6,7 @@ import logo from "../Image/logo.png"
 function Navbar() {
 
   const [hover, setHover] = useState("")
+  const [menuOpen, setMenuOpen] = useState(false)
   const { user, logout } = useContext(AuthContext)
 
   const styles = {
@@ -41,6 +42,20 @@ function Navbar() {
       alignItems: "center"
     },
 
+    mobileLinks: {
+      position: "absolute",
+      top: "90px",
+      left: 0,
+      width: "100%",
+      background: "#f6f5f2",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "15px",
+      padding: "20px 0",
+      display: menuOpen ? "flex" : "none",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+    },
+
     link: (name) => ({
       textDecoration: "none",
       color: hover === name ? "#ddc068" : "#827b58",
@@ -61,6 +76,11 @@ function Navbar() {
       margin: 0,
       padding: 0,
       alignItems: "center"
+    },
+
+    mobileAuth: {
+      flexDirection: "column",
+      gap: "10px"
     },
 
     login: {
@@ -84,6 +104,12 @@ function Navbar() {
       padding: "6px 14px",
       borderRadius: "20px",
       textDecoration: "none"
+    },
+
+    toggleBtn: {
+      display: "block",   
+      fontSize: "26px",
+      cursor: "pointer"
     }
   }
 
@@ -96,11 +122,19 @@ function Navbar() {
   ]
 
   return (
-    <div style={styles.navbar}>
+    <div style={styles.navbar} className="container-fluid">
 
       <img src={logo} alt="logo" style={styles.logo} />
 
-      <ul style={styles.links}>
+      <div
+        className="d-md-none"
+        style={styles.toggleBtn}
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        ☰
+      </div>
+
+      <ul style={styles.links} className="d-none d-md-flex">
         {navItems.map((item) => (
           <li key={item.name}>
             <Link
@@ -115,9 +149,9 @@ function Navbar() {
         ))}
       </ul>
 
-      <div style={styles.right}>
+      {/* Desktop Auth */}
+      <div style={styles.right} className="d-none d-md-flex">
         <ul style={styles.auth}>
-
           {user ? (
             <>
               <li>
@@ -147,20 +181,43 @@ function Navbar() {
           ) : (
             <>
               <li>
-                <Link to="/login" style={styles.login}>
-                  Log In
-                </Link>
+                <Link to="/login" style={styles.login}>Log In</Link>
               </li>
-
               <li>
-                <Link to="/signup" style={styles.signup}>
-                  Sign Up
-                </Link>
+                <Link to="/signup" style={styles.signup}>Sign Up</Link>
               </li>
             </>
           )}
-
         </ul>
+      </div>
+
+      <div style={styles.mobileLinks} className="d-md-none">
+
+        {navItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            style={styles.link(item.name)}
+            onClick={() => setMenuOpen(false)}
+          >
+            {item.name}
+          </Link>
+        ))}
+
+        <div style={{ ...styles.auth, ...styles.mobileAuth }}>
+          {user ? (
+            <>
+              <Link to="/profile" style={styles.login}>Profile</Link>
+              <div onClick={logout} style={styles.logout}>Log Out</div>
+            </>
+          ) : (
+            <>
+              <Link to="/login" style={styles.login}>Log In</Link>
+              <Link to="/signup" style={styles.signup}>Sign Up</Link>
+            </>
+          )}
+        </div>
+
       </div>
 
     </div>
